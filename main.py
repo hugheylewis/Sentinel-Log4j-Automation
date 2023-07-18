@@ -8,7 +8,7 @@ tio = TenableIO(APIkeys.accessKey,
                 product='Log4j Remediation', build='1.0.0')
 vulnerability_string = 'Log4j'
 vulnerability_list = []
-target_ipv4 = 'Enter a single IPv4 address here'
+target_ipv4 = 'Enter a single IPv4 address here'  # edit required
 
 
 def get_target_uuid():
