@@ -80,5 +80,3 @@ def main():
 
 
 main()
-
-# directory = input("Enter the directory: ")
