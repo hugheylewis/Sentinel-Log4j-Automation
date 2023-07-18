@@ -1,16 +1,14 @@
-# TODO: If committing to GitHub, add "config/.env" in your .gitignore to prevent committing/pushing API keys
 import restfly.errors
 from tenable.io import TenableIO
 from config.config import APIkeys
 import requests
 
 tio = TenableIO(APIkeys.accessKey,
-                APIkeys.secretKey, vendor='University of '
-                                          'Massachusetts Boston',
+                APIkeys.secretKey, vendor='Vendor Name Here',  # edit required
                 product='Log4j Remediation', build='1.0.0')
-vulnerability_string = 'Nessus'
+vulnerability_string = 'Log4j'
 vulnerability_list = []
-target_ipv4 = '158.121.114.45'
+target_ipv4 = 'Enter a single IPv4 address here'  # edit required
 
 
 def get_target_uuid():
@@ -20,12 +18,12 @@ def get_target_uuid():
         tenable_agent_id = asset['id']
         tenable_agent_discovered_ipv4 = asset['ipv4']
         if target_ipv4 in tenable_agent_discovered_ipv4:
-            if '158.121' in target_ipv4:
+            if '<>' in target_ipv4:  # edit required
                 asset_uuid.append(tenable_agent_id)
                 print(asset_uuid)
                 return asset_uuid
             else:
-                print("[+] ERROR: " + target_ipv4 + " is not a valid UMB IPv4 address")
+                print("[+] ERROR: " + target_ipv4 + " is not a valid IPv4 address")
 
 
 def get_target_vuln_list():
@@ -65,7 +63,7 @@ def remediation_scan(target):
         scan = tio.remediationscans.create_remediation_scan(
             _uuid=uuid,
             name='Log4j Remediation Scan - API Generated',
-            description="Remediation scan created by Cam H's Sentinel/Python automation",
+            description="Remediation scan created by <>'s Sentinel/Python automation",  # edit required
             #TODO: Finish get_scanners and add value below
             scanner_id='',
             scan_time_window=10,
