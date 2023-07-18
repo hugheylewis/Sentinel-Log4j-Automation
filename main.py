@@ -50,11 +50,9 @@ def get_scanners():
     response = req.json()
 
     # TODO: Fix the API parsed response (currently returns None)
-    if response and 'scans' in response:
-        if 'name' in response['scans']:
-            for name in response['scans']['name']:
-                return name
-    # return response
+    for i in response['scans']:
+        if 'cameron.hughey@umb.edu' in i['owner']:
+            print(i['name'])
 
 
 def remediation_scan(target):
