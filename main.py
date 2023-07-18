@@ -49,7 +49,7 @@ def get_scanners():
 
     # TODO: Fix the API parsed response (currently returns None)
     for i in response['scans']:
-        if 'cameron.hughey@umb.edu' in i['owner']:
+        if '<>' in i['owner']:  # edit required
             print(i['name'])
 
 
