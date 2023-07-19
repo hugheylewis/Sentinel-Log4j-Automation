@@ -4,11 +4,11 @@ from config.config import APIkeys
 import requests
 
 tio = TenableIO(APIkeys.accessKey,
-                APIkeys.secretKey, vendor='Vendor Name Here',  # edit required
+                APIkeys.secretKey, vendor='',  # edit required
                 product='Log4j Remediation', build='1.0.0')
 vulnerability_string = 'Log4j'
 vulnerability_list = []
-target_ipv4 = 'Enter a single IPv4 address here'  # edit required
+target_ipv4 = ''  # edit required
 
 
 def get_target_uuid():
@@ -18,9 +18,8 @@ def get_target_uuid():
         tenable_agent_id = asset['id']
         tenable_agent_discovered_ipv4 = asset['ipv4']
         if target_ipv4 in tenable_agent_discovered_ipv4:
-            if '<>' in target_ipv4:  # edit required
+            if '' in target_ipv4:  # edit required
                 asset_uuid.append(tenable_agent_id)
-                print(asset_uuid)
                 return asset_uuid
             else:
                 print("[+] ERROR: " + target_ipv4 + " is not a valid IPv4 address")
@@ -46,29 +45,37 @@ def get_scanners():
     }
     req = requests.get(url, headers=headers)
     response = req.json()
-
-    # TODO: Fix the API parsed response (currently returns None)
     for i in response['scans']:
-        if 'cameron.hughey@umb.edu' in i['owner']:
-            print(i['name'])
+        if '' in i['owner']:  # edit required
+            return i['id'], {i['owner']: i['name']}
 
 
-def remediation_scan(target):
-    """
+def remediation_scan():
+    scanner_result = get_scanners()
+    scan_name = ''
+    url = "https://cloud.tenable.com/scans/remediation"
+    scan_dict = scanner_result[1]
+    for key in scan_dict:
+        scan_name = (scan_dict[key])
+    payload = {
+        "settings": {
+            "name": scan_name,
+            "description": "Remediation scan created by <>'s Sentinel/Python automation",
+            "scanner_id": scanner_result[0]
+        },
+        # TODO: Fix UUID format. https://developer.tenable.com/reference/editor-list-templates
+        "uuid": "172"
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-ApiKeys": f"accessKey={APIkeys.accessKey};secretKey={APIkeys.secretKey}"
+    }
 
-    :param target:
-    :return:
-    """
-    for uuid in get_target_uuid():
-        scan = tio.remediationscans.create_remediation_scan(
-            _uuid=uuid,
-            name='Log4j Remediation Scan - API Generated',
-            description="Remediation scan created by <>'s Sentinel/Python automation",  # edit required
-            #TODO: Finish get_scanners and add value below
-            scanner_id='',
-            scan_time_window=10,
-            targets=['127.0.0.1:3000'],
-            template='advanced')
+    response = requests.post(url, json=payload, headers=headers)
+
+    # TODO: Change to a return after verified working
+    print(response.text)
 
 
 def main():
@@ -79,6 +86,4 @@ def main():
         print("[+] HTTP 504: Gateway timeout: " + str(gateway))
 
 
-main()
-
-# directory = input("Enter the directory: ")
+remediation_scan()
