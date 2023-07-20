@@ -4,11 +4,11 @@ from config.config import APIkeys
 import requests
 
 tio = TenableIO(APIkeys.accessKey,
-                APIkeys.secretKey, vendor='',  # edit required
+                APIkeys.secretKey, vendor='University of Massachusetts Boston',  # edit required
                 product='Log4j Remediation', build='1.0.0')
 vulnerability_string = 'Log4j'
 vulnerability_list = []
-target_ipv4 = ''  # edit required
+target_ipv4 = '158.121.203.96'  # edit required
 
 
 def get_target_uuid():
@@ -18,7 +18,7 @@ def get_target_uuid():
         tenable_agent_id = asset['id']
         tenable_agent_discovered_ipv4 = asset['ipv4']
         if target_ipv4 in tenable_agent_discovered_ipv4:
-            if '' in target_ipv4:  # edit required
+            if '158.121' in target_ipv4:  # edit required
                 asset_uuid.append(tenable_agent_id)
                 return asset_uuid
             else:
@@ -46,11 +46,27 @@ def get_scanners():
     req = requests.get(url, headers=headers)
     response = req.json()
     for i in response['scans']:
-        if '' in i['owner']:  # edit required
+        if 'cameron.hughey@umb.edu' in i['owner']:  # edit required
             return i['id'], {i['owner']: i['name']}
 
 
-def remediation_scan():
+def list_templates():
+    url = "https://cloud.tenable.com/editor/scan/templates"
+    uuids = []
+    headers = {
+        "accept": "application/json",
+        "X-ApiKeys": f"accessKey={APIkeys.accessKey};secretKey={APIkeys.secretKey}"
+    }
+
+    req = requests.get(url, headers=headers)
+    response = req.json()
+    for i in response['templates']:
+        if 'Log4j' in i['desc']:  # edit required
+            uuids.append(i['uuid'])
+    return uuids
+
+
+def remediation_scan(uuid):
     scanner_result = get_scanners()
     scan_name = ''
     url = "https://cloud.tenable.com/scans/remediation"
@@ -63,8 +79,9 @@ def remediation_scan():
             "description": "Remediation scan created by <>'s Sentinel/Python automation",
             "scanner_id": scanner_result[0]
         },
-        # TODO: Fix UUID format. https://developer.tenable.com/reference/editor-list-templates
-        "uuid": "172"
+        # TODO: Fix UUID format. Current error: "Invalid 'uuid' for a remediation scan". \
+        #  https://developer.tenable.com/reference/editor-list-templates
+        "uuid": uuid
     }
     headers = {
         "accept": "application/json",
@@ -86,4 +103,8 @@ def main():
         print("[+] HTTP 504: Gateway timeout: " + str(gateway))
 
 
-remediation_scan()
+uuids = list_templates()
+
+for i in uuids:
+    remediation_scan(i)
+    print(i)
