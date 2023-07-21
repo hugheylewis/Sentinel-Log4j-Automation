@@ -1,3 +1,4 @@
+# TODO: Create class for Headers
 import restfly.errors
 from tenable.io import TenableIO
 from config.config import APIkeys
