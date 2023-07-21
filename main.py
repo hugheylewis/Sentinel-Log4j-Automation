@@ -12,6 +12,26 @@ vulnerability_list = []
 target_ipv4 = ''  # edit required
 
 
+class Header:
+
+  def __init__(self, url, headers):
+    self.url = url
+    self._headers = headers
+
+  # TODO: Implement
+  def url(self):
+    pass
+
+  @property
+  def headers(self):
+    return self._headers
+
+  # TODO: Implement
+  @headers.setter
+  def headers(self):
+    pass
+
+
 def get_target_uuid():
     asset_uuid = []
 
