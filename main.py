@@ -1,14 +1,35 @@
+# TODO: Create class for Headers
 import restfly.errors
 from tenable.io import TenableIO
 from config.config import APIkeys
 import requests
 
 tio = TenableIO(APIkeys.accessKey,
-                APIkeys.secretKey, vendor='University of Massachusetts Boston',  # edit required
+                APIkeys.secretKey, vendor='',  # edit required
                 product='Log4j Remediation', build='1.0.0')
 vulnerability_string = 'Log4j'
 vulnerability_list = []
-target_ipv4 = '158.121.203.96'  # edit required
+target_ipv4 = ''  # edit required
+
+
+class Header:
+
+  def __init__(self, url, headers):
+    self.url = url
+    self._headers = headers
+
+  # TODO: Implement
+  def url(self):
+    pass
+
+  @property
+  def headers(self):
+    return self._headers
+
+  # TODO: Implement
+  @headers.setter
+  def headers(self):
+    pass
 
 
 class Header:
@@ -40,7 +61,7 @@ def get_target_uuid():
         tenable_agent_id = asset['id']
         tenable_agent_discovered_ipv4 = asset['ipv4']
         if target_ipv4 in tenable_agent_discovered_ipv4:
-            if '158.121' in target_ipv4:  # edit required
+            if '' in target_ipv4:  # edit required
                 asset_uuid.append(tenable_agent_id)
                 return asset_uuid
             else:
@@ -68,7 +89,7 @@ def get_scanners():
     req = requests.get(url, headers=headers)
     response = req.json()
     for i in response['scans']:
-        if 'cameron.hughey@umb.edu' in i['owner']:  # edit required
+        if '' in i['owner']:  # edit required
             return i['id'], {i['owner']: i['name']}
 
 
@@ -98,7 +119,7 @@ def remediation_scan(uuid):
     payload = {
         "settings": {
             "name": scan_name,
-            "description": "Remediation scan created by <>'s Sentinel/Python automation",
+            "description": "Remediation scan created by <>'s Sentinel/Python automation",  # edit required
             "scanner_id": scanner_result[0]
         },
         # TODO: Fix UUID format. Current error: "Invalid 'uuid' for a remediation scan". \
