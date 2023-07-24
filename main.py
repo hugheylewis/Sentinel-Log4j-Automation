@@ -82,7 +82,8 @@ def get_scanners():
 
 def list_templates():
     uuids = []
-    list_template_header = Header("https://cloud.tenable.com/editor/scan/templates", APIkeys.accessKey, APIkeys.secretKey)
+    list_template_header = Header("https://cloud.tenable.com/editor/scan/templates", APIkeys.accessKey, 
+                                  APIkeys.secretKey)
     req = requests.get(list_template_header.url, headers=list_template_header.asdict())
     response = req.json()
     for i in response['templates']:
