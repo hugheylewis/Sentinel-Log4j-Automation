@@ -1,8 +1,8 @@
-# TODO: Create class for Headers
 import restfly.errors
+import requests
 from tenable.io import TenableIO
 from config.config import APIkeys
-import requests
+
 
 tio = TenableIO(APIkeys.accessKey,
                 APIkeys.secretKey, vendor='',  # edit required
@@ -38,6 +38,12 @@ class Header:
         if isinstance(new_endpoint, str) and "https://cloud.tenable.com/" in new_endpoint:
             self._url += new_endpoint
 
+    def __str__(self):
+        return f"{self.ACCEPT}, 'X-ApiKeys': 'accessKey={self._access_key};secretKey={self._secret_key}'"
+
+    def asdict(self):
+        return {'accept': "application/json", 'X-ApiKeys': f'accessKey={self._access_key};secretKey={self._secret_key}'}
+
 
 def get_target_uuid():
     asset_uuid = []
@@ -67,11 +73,7 @@ def get_target_vuln_list():
 
 def get_scanners():
     scanner_header = Header("https://cloud.tenable.com/scans/remediation", APIkeys.accessKey, APIkeys.secretKey)
-    headers = {
-        "accept": scanner_header.ACCEPT,
-        "X-ApiKeys": f"accessKey={scanner_header.access_key};secretKey={scanner_header.secret_key}"
-    }
-    req = requests.get(scanner_header.url, headers=headers)
+    req = requests.get(scanner_header.url, headers=scanner_header.asdict())
     response = req.json()
     for i in response['scans']:
         if '' in i['owner']:  # edit required
@@ -79,14 +81,9 @@ def get_scanners():
 
 
 def list_templates():
-    url = "https://cloud.tenable.com/editor/scan/templates"
     uuids = []
-    headers = {
-        "accept": "application/json",
-        "X-ApiKeys": f"accessKey={APIkeys.accessKey};secretKey={APIkeys.secretKey}"
-    }
-
-    req = requests.get(url, headers=headers)
+    list_template_header = Header("https://cloud.tenable.com/editor/scan/templates", APIkeys.accessKey, APIkeys.secretKey)
+    req = requests.get(list_template_header.url, headers=list_template_header.asdict())
     response = req.json()
     for i in response['templates']:
         if 'Log4j' in i['desc']:  # edit required
@@ -137,4 +134,4 @@ def main():
 #     remediation_scan(i)
 #     print(i)
 
-print(get_scanners())
+print(list_templates())
