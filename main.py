@@ -14,35 +14,20 @@ target_ipv4 = ''  # edit required
 
 class Header:
 
-  def __init__(self, url, headers):
-    self.url = url
-    self._headers = headers
+    ACCEPT = '"accept": "application/json"'
 
-  # TODO: Implement
-  def url(self):
-    pass
-
-  @property
-  def headers(self):
-    return self._headers
-
-  # TODO: Implement
-  @headers.setter
-  def headers(self):
-    pass
-
-
-class Header:
-
-    ACCEPT = {"accept": "application/json"}
-
-    def __init__(self, url, api_key):
-        self._api_key = api_key
+    def __init__(self, url, access_key, secret_key):
         self._url = url
+        self._access_key = access_key
+        self._secret_key = secret_key
 
     @property
-    def api_key(self):
-        return self._api_key
+    def access_key(self):
+        return self._access_key
+
+    @property
+    def secret_key(self):
+        return self._secret_key
 
     @property
     def url(self):
@@ -81,12 +66,12 @@ def get_target_vuln_list():
 
 
 def get_scanners():
-    url = "https://cloud.tenable.com/scans"
+    scanner_header = Header("https://cloud.tenable.com/scans/remediation", APIkeys.accessKey, APIkeys.secretKey)
     headers = {
-        "accept": "application/json",
-        "X-ApiKeys": f"accessKey={APIkeys.accessKey};secretKey={APIkeys.secretKey}"
+        "accept": scanner_header.ACCEPT,
+        "X-ApiKeys": f"accessKey={scanner_header.access_key};secretKey={scanner_header.secret_key}"
     }
-    req = requests.get(url, headers=headers)
+    req = requests.get(scanner_header.url, headers=headers)
     response = req.json()
     for i in response['scans']:
         if '' in i['owner']:  # edit required
@@ -146,8 +131,10 @@ def main():
         print("[+] HTTP 504: Gateway timeout: " + str(gateway))
 
 
-uuids = list_templates()
+# uuids = list_templates()
+#
+# for i in uuids:
+#     remediation_scan(i)
+#     print(i)
 
-for i in uuids:
-    remediation_scan(i)
-    print(i)
+print(get_scanners())
