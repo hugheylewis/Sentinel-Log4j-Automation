@@ -1,8 +1,9 @@
 # TODO: Create class for Headers
-import restfly.errors
+
 from tenable.io import TenableIO
 from config.config import APIkeys
 import requests
+import restfly.errors
 
 tio = TenableIO(APIkeys.accessKey,
                 APIkeys.secretKey, vendor='',  # edit required
