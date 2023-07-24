@@ -1,5 +1,3 @@
-# TODO: Create class for Headers
-
 from tenable.io import TenableIO
 from config.config import APIkeys
 import requests
