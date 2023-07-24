@@ -11,6 +11,28 @@ vulnerability_list = []
 target_ipv4 = '158.121.203.96'  # edit required
 
 
+class Header:
+
+    ACCEPT = {"accept": "application/json"}
+
+    def __init__(self, url, api_key):
+        self._api_key = api_key
+        self._url = url
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @property
+    def url(self):
+        return self._url
+
+    @url.setter
+    def url(self, new_endpoint):
+        if isinstance(new_endpoint, str) and "https://cloud.tenable.com/" in new_endpoint:
+            self._url += new_endpoint
+
+
 def get_target_uuid():
     asset_uuid = []
 
