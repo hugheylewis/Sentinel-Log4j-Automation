@@ -81,32 +81,25 @@ def get_scanners():
 
 
 def list_templates():
-    uuids = []
-    list_template_header = Header("https://cloud.tenable.com/editor/scan/templates", APIkeys.accessKey, APIkeys.secretKey)
+    list_template_header = Header("https://cloud.tenable.com/scans", APIkeys.accessKey,
+                                  APIkeys.secretKey)
     req = requests.get(list_template_header.url, headers=list_template_header.asdict())
     response = req.json()
-    for i in response['templates']:
-        if 'Log4j' in i['desc']:  # edit required
-            uuids.append(i['uuid'])
-    return uuids
+    for i in response['scans']:
+        if "Log4j Remediation v2" in i['name']:
+            return i['schedule_uuid']
 
 
-def remediation_scan(uuid):
+def remediation_scan():
     scanner_result = get_scanners()
+    scan_template_id = list_templates()
     scan_name = ''
-    url = "https://cloud.tenable.com/scans/remediation"
+    url = "https://cloud.tenable.com/scans/" + scan_template_id + "/launch"
     scan_dict = scanner_result[1]
     for key in scan_dict:
         scan_name = (scan_dict[key])
     payload = {
-        "settings": {
-            "name": scan_name,
-            "description": "Remediation scan created by <>'s Sentinel/Python automation",  # edit required
-            "scanner_id": scanner_result[0]
-        },
-        # TODO: Fix UUID format. Current error: "Invalid 'uuid' for a remediation scan". \
-        #  https://developer.tenable.com/reference/editor-list-templates
-        "uuid": uuid
+        "alt_targets": ["158.121.203.96"]
     }
     headers = {
         "accept": "application/json",
@@ -128,10 +121,4 @@ def main():
         print("[+] HTTP 504: Gateway timeout: " + str(gateway))
 
 
-# uuids = list_templates()
-#
-# for i in uuids:
-#     remediation_scan(i)
-#     print(i)
-
-print(list_templates())
+remediation_scan()
