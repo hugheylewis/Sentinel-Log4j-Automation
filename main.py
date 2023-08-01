@@ -1,3 +1,5 @@
+import json
+
 import restfly.errors
 import requests
 from tenable.io import TenableIO
@@ -8,7 +10,7 @@ tio = TenableIO(APIkeys.accessKey,
                 APIkeys.secretKey, vendor='',  # edit required
                 product='Log4j Remediation', build='1.0.0')
 vulnerability_string = 'Log4j'
-vulnerability_list = []
+log4j_vuln_list = []
 target_ipv4 = ''  # edit required
 
 
@@ -47,36 +49,37 @@ class Header:
 
 def get_target_uuid():
     asset_uuid = []
+    get_target_header = Header("https://cloud.tenable.com/assets", APIkeys.accessKey, APIkeys.secretKey)
+    req = requests.get(get_target_header.url, headers=get_target_header.asdict())
+    response = req.text
+    json_response = json.loads(response)
 
-    for asset in tio.assets.list():
-        tenable_agent_id = asset['id']
-        tenable_agent_discovered_ipv4 = asset['ipv4']
-        if target_ipv4 in tenable_agent_discovered_ipv4:
-            if '' in target_ipv4:  # edit required
-                asset_uuid.append(tenable_agent_id)
-                return asset_uuid
-            else:
-                print("[+] ERROR: " + target_ipv4 + " is not a valid IPv4 address")
+    for i in json_response['assets']:
+        if "itxxum00018164" in i['hostname']:
+            asset_uuid.append(i['id'])
+    return asset_uuid
 
 
 def get_target_vuln_list():
+    other_vuln_list = []
     for uuid in get_target_uuid():
-        for vuln in tio.workbenches.asset_vulns(uuid):
-            log4j_vuln = vuln['plugin_name']  # Unpacks dictionary key into a string
-            if vulnerability_string in log4j_vuln:
-                vulnerability_list.append(log4j_vuln)
-                for i in vulnerability_list:
-                    print(i)
+        for vulnerability in tio.workbenches.asset_vulns(uuid):
+            vuln_found = vulnerability['plugin_name']  # Unpacks dictionary key into a string
+            if vulnerability_string in vuln_found:
+                log4j_vuln_list.append(vuln_found)
             else:
-                print("[+] Vulnerability " + '"' + log4j_vuln + '"' + " does not relate to Log4j.\nSkipping...")
+                other_vuln_list.append(vuln_found)
+    return other_vuln_list, log4j_vuln_list
 
 
 def get_scanners():
-    scanner_header = Header("https://cloud.tenable.com/scans/remediation", APIkeys.accessKey, APIkeys.secretKey)
+    scanner_header = Header("https://cloud.tenable.com/scanners", APIkeys.accessKey, APIkeys.secretKey)
     req = requests.get(scanner_header.url, headers=scanner_header.asdict())
     response = req.json()
-    for i in response['scans']:
-        if '' in i['owner']:  # edit required
+    print(response)
+    for i in response:
+        print(i)
+        if 'Log4j test machine scans' in i['name']:  # edit required
             return i['id'], {i['owner']: i['name']}
 
 
@@ -90,35 +93,28 @@ def list_templates():
             return i['schedule_uuid']
 
 
-def remediation_scan():
-    scanner_result = get_scanners()
+def launch_scan():
+    launch_scan_header = Header("https://cloud.tenable.com/scans/", APIkeys.accessKey, APIkeys.secretKey)
     scan_template_id = list_templates()
-    scan_name = ''
     url = "https://cloud.tenable.com/scans/" + scan_template_id + "/launch"
-    scan_dict = scanner_result[1]
-    for key in scan_dict:
-        scan_name = (scan_dict[key])
-    payload = {
-        "alt_targets": ["158.121.203.96"]
-    }
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-ApiKeys": f"accessKey={APIkeys.accessKey};secretKey={APIkeys.secretKey}"
-    }
 
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, headers=launch_scan_header.asdict())
 
     # TODO: Change to a return after verified working
     print(response.text)
 
 
 def main():
-    try:
-        scanner_response = get_scanners()
-        print(scanner_response)
-    except restfly.errors.GatewayTimeoutError as gateway:
-        print("[+] HTTP 504: Gateway timeout: " + str(gateway))
+    vuln_list = get_target_vuln_list()
+    for i in vuln_list:
+        print(i)
+    # TODO: Fix the get_scanners() function
+    # try:
+    #     scanner_response = get_scanners()
+    #     print(scanner_response)
+    # except restfly.errors.GatewayTimeoutError as gateway:
+    #     print("[+] HTTP 504: Gateway timeout: " + str(gateway))
 
 
-remediation_scan()
+if __name__ == "__main__":
+    main()
