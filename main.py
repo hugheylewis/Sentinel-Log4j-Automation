@@ -55,7 +55,7 @@ def get_target_uuid():
     json_response = json.loads(response)
 
     for i in json_response['assets']:
-        if "itxxum00018164" in i['hostname']:
+        if "" in i['hostname']:  # add your hostname here
             asset_uuid.append(i['id'])
     return asset_uuid
 
@@ -79,7 +79,7 @@ def get_scanners():
     print(response)
     for i in response:
         print(i)
-        if 'Log4j test machine scans' in i['name']:  # edit required
+        if '' in i['name']:  # add the owner name here
             return i['id'], {i['owner']: i['name']}
 
 
@@ -89,7 +89,7 @@ def list_templates():
     req = requests.get(list_template_header.url, headers=list_template_header.asdict())
     response = req.json()
     for i in response['scans']:
-        if "Log4j Remediation v2" in i['name']:
+        if "" in i['name']:  # add the scan name here
             return i['schedule_uuid']
 
 
